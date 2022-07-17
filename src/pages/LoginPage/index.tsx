@@ -1,13 +1,22 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
+import React, { useEffect, useState } from "react";
 
 import { firebaseAuth } from "../../firebase";
 
-const RegisterPage = () => {
+const LoginPage = () => {
   const [state, setState] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    onAuthStateChanged(firebaseAuth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        console.log({ uid });
+      }
+    });
+  }, []);
 
   return (
     <div>
@@ -28,26 +37,27 @@ const RegisterPage = () => {
       <div>
         <button
           onClick={() => {
-            console.log(state);
-            createUserWithEmailAndPassword(
+            signInWithEmailAndPassword(
               firebaseAuth,
               state.email,
               state.password
             )
               .then((userCredential) => {
-                alert("Пользователь успешно создан");
-                console.log({ userCredential });
+                const user = userCredential.user;
+
+                console.log({ user });
               })
               .catch((error) => {
-                alert("Не удалось создать пользователя");
+                const errorCode = error.code;
+                const errorMessage = error.message;
               });
           }}
         >
-          Register
+          login
         </button>
       </div>
     </div>
   );
 };
 
-export default RegisterPage;
+export default LoginPage;
